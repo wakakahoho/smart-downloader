@@ -19,3 +19,4 @@ syntax: glob
 
 /smartdownloader.iml
 /.idea/
+/.idea/vcs.xml
