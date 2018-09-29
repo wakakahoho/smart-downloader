@@ -20,3 +20,7 @@ syntax: glob
 /smartdownloader.iml
 /.idea/
 /.idea/vcs.xml
+/.classpath
+/.project
+/target/
+/.settings/
