@@ -1,12 +1,14 @@
 package com.xd.sdl.logging;
 
 
-import java.io.IOException;
-import java.time.Instant;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+
+
 
 /**
  * @author duanxiang
@@ -15,54 +17,86 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class LogService implements Logger {
 
     private static final String NAME = LogService.class.getName();
-    private final Appender appender;
-    private final BlockingQueue<String> logs;
-    private final LogThread thread;
+    private static final int MAX_RETRY_TIMES = 3;
+    private BlockingQueue<String> logs;
+    private LogThread thread;
+    private volatile boolean start = false;
+    private LogLevel defaultLevel = LogLevel.INFO;
+    private int retryTimes = 0;
 
-
-
-    public LogService() {
-        appender = new LocalFileSystemAppender();
-        logs = new LinkedBlockingQueue<>();
-        thread = new LogThread(NAME, logs, appender);
+    private LogService() {
+        this.logs = new ArrayBlockingQueue<>(1024);
+        this.thread = new LogThread(NAME, logs);
+        start();
     }
+
 
     @Override
     public void start() {
-        thread.start();
-        System.out.println("log service started");
+            if (start) {
+                throw new IllegalStateException("LogService already started!");
+            }
+            thread.start();
+            start = true;
     }
 
     @Override
     public void stop() {
-        thread.interrupt();
-        System.out.println("log service stoped");
+        if (!start) {
+            throw new IllegalStateException("LogService is not started!");
+        }
+        thread.cancel();
+        start = false;
+
 
     }
 
     @Override
     public void debug(String msg) {
-
-        log("DEBUG->"+getTimeStamp()+":"+msg);
+        if (LogLevel.DEBUG.equals(defaultLevel)) {
+            log("DEBUG->" + getTimeStamp() + ":" + msg);
+        }
     }
 
     @Override
     public void info(String msg) {
-
-        log("INFO->"+getTimeStamp()+":"+msg);
-
+        if (LogLevel.INFO.equals(defaultLevel)) {
+            log("INFO->" + getTimeStamp() + ":" + msg);
+        }
     }
 
     @Override
     public void error(String msg) {
-        log("ERROR->"+getTimeStamp()+":"+msg);
-
+        if (LogLevel.ERROR.equals(defaultLevel)) {
+            log("ERROR->" + getTimeStamp() + ":" + msg);
+        }
     }
 
     private void log(String msg) {
         try {
+
+            synchronized (this) {
+                if (this.thread.isStop()) {
+                    this.retryTimes++;
+                    if (retryTimes > MAX_RETRY_TIMES) {
+                        throw new RuntimeException(
+                            "LogService got a error! LogService attempt restart failure");
+                    }
+                    //恢复线程
+                    stop();
+                    this.thread = new LogThread(NAME,logs);
+                    start();
+                    System.out.println("restarting...");
+
+
+                }
+
+            }
+
+            msg = getContext() + ":" + msg;
             msg += "\n";
             logs.put(msg);
+
         } catch (InterruptedException e) {
             //stop logger Thread
             this.stop();
@@ -70,59 +104,58 @@ public class LogService implements Logger {
         }
     }
 
-    class LogThread extends Thread {
-        /**
-         * 1 seconds write once
-         */
-
-        private static final long interval = 500;
-
-        private final BlockingQueue<String> queue;
-        private final Appender appender;
-        private long lastTimeStamp = 0L;
-
-
-        LogThread(String name, BlockingQueue<String> queue, Appender appender) {
-            super(name);
-            this.queue = queue;
-            this.appender = appender;
-
-        }
-
-        @Override
-        public void interrupt() {
-            try {
-                appender.close();
-            } catch (IOException e) {
-                //do nothing
-            } finally {
-                super.interrupt();
-            }
-
-        }
-
-        @Override
-        public void run() {
-            try {
-                while (!isInterrupted()){
-                    if(0 == lastTimeStamp || Instant.now().toEpochMilli() -lastTimeStamp > interval|| queue.size()> 20){
-                        appender.write(queue.take().getBytes());
-                        lastTimeStamp = Instant.now().toEpochMilli();
-                    }
-                }
-            } catch (Exception e) {
-                interrupt();
+    private String getContext() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        StackTraceElement log = stackTrace[1];
+        String tag = null;
+        for (int i = 1; i < stackTrace.length; i++) {
+            StackTraceElement e = stackTrace[i];
+            if (!e.getClassName().equals(log.getClassName())) {
+                tag = e.getClassName() + "." + e.getMethodName();
+                break;
             }
         }
+        if (tag == null) {
+            tag = log.getClassName() + "." + log.getMethodName();
+
+        }
+        return tag;
+    }
+
+
+    public void setLevel(LogLevel level) {
+        this.defaultLevel = level;
+    }
+
+    public static Logger getLogger() {
+        return LoggerHolder.logService;
     }
 
 
     private String getTimeStamp() {
         LocalDateTime localDateTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String format = localDateTime.format(formatter);
-        return format;
+        return localDateTime.format(formatter);
 
+    }
+
+    private static class LoggerHolder {
+
+        public static LogService logService = new LogService();
+    }
+
+
+    enum LogLevel {
+
+        DEBUG("debug"),
+        INFO("info"),
+        ERROR("error");
+
+        private String value;
+
+        LogLevel(String value) {
+            this.value = value;
+        }
     }
 
 }

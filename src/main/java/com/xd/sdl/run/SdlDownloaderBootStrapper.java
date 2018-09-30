@@ -3,6 +3,8 @@ package com.xd.sdl.run;
 import java.util.Scanner;
 
 import com.xd.sdl.config.Configuration;
+import com.xd.sdl.logging.LogService;
+import com.xd.sdl.logging.Logger;
 import com.xd.sdl.task.cmd.RouteCommand;
 
 
@@ -15,19 +17,13 @@ import com.xd.sdl.task.cmd.RouteCommand;
 public class SdlDownloaderBootStrapper {
 
     private Configuration configuration = new Configuration();
-    RouteCommand command = new RouteCommand(configuration);
+    private static final Logger logger = LogService.getLogger();
+    public static void main(String[] args) throws InterruptedException {
+       while (true){
+           Thread.sleep(1000);
+           logger.info("启动下载服务");
 
-    public void run() {
-        Scanner scan = new Scanner(System.in);
-        while (scan.hasNext()) {
-            String cmdString = scan.nextLine();
-            if ("stop".equals(cmdString)) {
-                break;
-            }
-            if (!command.cmd(cmdString)) {
-                System.out.println("下载任务出错");
-            }
-        }
+       }
 
     }
 }

@@ -1,7 +1,5 @@
 package com.xd.sdl.task.cmd;
 
-import com.xd.sdl.resource.Resource;
-
 /**
  * @author duanxiang
  * @since 2018/9/14 22:51

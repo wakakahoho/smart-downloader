@@ -1,4 +1,4 @@
-package com.xd.sdl.logging;
+package com.xd.sdl.logging.appender.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,39 +9,40 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import com.xd.sdl.logging.appender.Appender;
+
 /**
  * @author duanxiang
  * @since 2018/9/29 15:36
  */
 public class LocalFileSystemAppender implements Appender {
 
-    private final String logPath = "/devlp/log2.out";
-    private final boolean isDelete = false;
-    private FileChannel fileChannel;
     /**
-     * 每次读取次数
+     * 每次读取字节数
      */
     private static final int READ_SIZE = 1024;
 
-    ByteBuffer byteBuffer;
-    Path path;
+    private final String logPath = "/devlp/log2.out";
+    private final boolean isDelete = false;
+    private FileChannel fileChannel;
+
+    private ByteBuffer byteBuffer;
+    private Path path;
 
     public LocalFileSystemAppender() {
-        init();
+
     }
 
-    public void init() {
+    @Override
+    public void init() throws IOException {
         File file = new File(logPath);
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            path = Paths.get(logPath);
-            fileChannel = FileChannel.open(path, StandardOpenOption.APPEND);
-            byteBuffer = ByteBuffer.allocate(READ_SIZE);
-        } catch (IOException e) {
-            System.err.println("LocalFileSystemAppender init error :" + e.getLocalizedMessage());
+        if (!file.exists()) {
+            file.createNewFile();
         }
+        path = Paths.get(logPath);
+        fileChannel = FileChannel.open(path, StandardOpenOption.APPEND);
+        byteBuffer = ByteBuffer.allocate(READ_SIZE);
+
 
     }
 

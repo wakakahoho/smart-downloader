@@ -6,10 +6,5 @@ package com.xd.sdl.run;
  */
 public class DownloaderRunner {
 
-    private SdlDownloaderBootStrapper bootStrapper = new SdlDownloaderBootStrapper();
 
-    public void run(){
-
-        bootStrapper.run();
-    }
 }
