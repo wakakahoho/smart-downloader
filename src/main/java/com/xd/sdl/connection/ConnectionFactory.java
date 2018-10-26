@@ -37,6 +37,7 @@ public class ConnectionFactory {
         }
         try {
             conn = connClass.getDeclaredConstructor(resource.getClass())
+
                 .newInstance(resource);
 
         } catch (Exception e) {

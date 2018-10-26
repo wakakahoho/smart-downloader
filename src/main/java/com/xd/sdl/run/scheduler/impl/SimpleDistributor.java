@@ -13,13 +13,9 @@ import com.xd.sdl.task.Task;
  */
 public class SimpleDistributor extends BaseDistributor {
 
-
-
     public SimpleDistributor(Configuration configuration) {
         super(configuration);
     }
-
-
 
     @Override
     public void distribute(Task task) {
