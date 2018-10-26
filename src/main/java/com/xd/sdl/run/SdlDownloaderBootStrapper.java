@@ -1,11 +1,10 @@
 package com.xd.sdl.run;
 
-import java.util.Scanner;
 
 import com.xd.sdl.config.Configuration;
 import com.xd.sdl.logging.LogService;
 import com.xd.sdl.logging.Logger;
-import com.xd.sdl.task.cmd.RouteCommand;
+import com.xd.sdl.task.cmd.CmdService;
 
 
 /**
@@ -16,14 +15,12 @@ import com.xd.sdl.task.cmd.RouteCommand;
  */
 public class SdlDownloaderBootStrapper {
 
-    private Configuration configuration = new Configuration();
+    private static Configuration configuration = new Configuration();
     private static final Logger logger = LogService.getLogger();
+    private static CmdService cmdService = new CmdService(configuration);
     public static void main(String[] args) throws InterruptedException {
-       while (true){
-           Thread.sleep(1000);
-           logger.info("启动下载服务");
-
-       }
+        logger.info("start SdlDownloaderBootStrapper");
+        cmdService.start();
 
     }
 }

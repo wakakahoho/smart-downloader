@@ -1,6 +1,8 @@
 package com.xd.sdl.task.cmd;
 
 import com.xd.sdl.config.Configuration;
+import com.xd.sdl.logging.LogService;
+import com.xd.sdl.logging.Logger;
 import com.xd.sdl.parser.ParseUtil;
 import com.xd.sdl.task.TaskHolder;
 
@@ -9,7 +11,7 @@ import com.xd.sdl.task.TaskHolder;
  * @since 2018/9/15 12:00
  */
 public class AddTaskCommand extends AbstractCommand {
-
+    private static final Logger logger = LogService.getLogger();
     private  final String ADD_CMD = "add";
     private Command delegate;
     private TaskHolder taskHolder ;
@@ -21,8 +23,7 @@ public class AddTaskCommand extends AbstractCommand {
     @Override
     public boolean cmd(String cmd) {
         if(cmd.startsWith(ADD_CMD)){
-            System.out.println("正在...添加任务:");
-            System.out.println(ParseUtil.cut(ADD_CMD,cmd));
+            logger.info("recv add command");
             return delegate.cmd(ParseUtil.cut(ADD_CMD,cmd));
         }
         return delegate.cmd(cmd);

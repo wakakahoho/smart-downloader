@@ -53,16 +53,14 @@ public class LogService implements Logger {
 
     @Override
     public void debug(String msg) {
-        if (LogLevel.DEBUG.equals(defaultLevel)) {
+        if (!LogLevel.ERROR.equals(defaultLevel)) {
             log("DEBUG->" + getTimeStamp() + ":" + msg);
         }
     }
 
     @Override
     public void info(String msg) {
-        if (LogLevel.INFO.equals(defaultLevel)) {
             log("INFO->" + getTimeStamp() + ":" + msg);
-        }
     }
 
     @Override
@@ -82,7 +80,7 @@ public class LogService implements Logger {
                         throw new RuntimeException(
                             "LogService got a error! LogService attempt restart failure");
                     }
-                    //恢复线程
+                    //restart
                     stop();
                     this.thread = new LogThread(NAME,logs);
                     start();

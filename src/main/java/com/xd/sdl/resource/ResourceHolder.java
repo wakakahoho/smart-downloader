@@ -2,6 +2,8 @@ package com.xd.sdl.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import javax.annotation.Resources;
 
@@ -15,8 +17,7 @@ public class ResourceHolder {
 
     private Configuration configuration;
 
-    private final List<Resource> resources = new ArrayList<>();
-
+    private final BlockingQueue<Resource> resources = new ArrayBlockingQueue<>(20);
 
     public ResourceHolder(Configuration configuration){
         this.configuration = configuration;
@@ -24,9 +25,12 @@ public class ResourceHolder {
 
     public void addResource(Resource resource){
         resources.add(resource);
-        //通知打包器进行打包
-        configuration.packager().packaging(resource);
     }
+
+    public BlockingQueue<Resource> getResources() {
+        return resources;
+    }
+
     public Configuration getConfiguration() {
         return configuration;
     }

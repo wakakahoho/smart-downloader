@@ -9,8 +9,11 @@ import com.xd.sdl.task.Task;
 /**
  * @author duanxiang
  * @since 2018/9/14 23:22
+ *
  */
 public class SimpleDistributor extends BaseDistributor {
+
+
 
     public SimpleDistributor(Configuration configuration) {
         super(configuration);

@@ -3,6 +3,8 @@ package com.xd.sdl.task.cmd;
 import java.util.Objects;
 
 import com.xd.sdl.config.Configuration;
+import com.xd.sdl.logging.LogService;
+import com.xd.sdl.logging.Logger;
 import com.xd.sdl.parser.UrlParser;
 import com.xd.sdl.resource.Resource;
 
@@ -12,6 +14,8 @@ import com.xd.sdl.resource.Resource;
  */
 public class SimpleCommand extends AbstractCommand {
 
+    private static final Logger logger = LogService.getLogger();
+
     public SimpleCommand(Configuration configuration) {
         super(configuration);
     }
@@ -19,7 +23,7 @@ public class SimpleCommand extends AbstractCommand {
     @Override
     public boolean cmd(String  cmd) {
         for(UrlParser parser : this.parserList){
-            System.out.println(cmd);
+            logger.info("正在解析...");
             Resource resource = parser.parse(cmd);
             if(Objects.nonNull(resource)){
                 this.resourceHolder.addResource(resource);
